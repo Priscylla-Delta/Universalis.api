@@ -14,7 +14,8 @@ def main():
     # Ask the user for a valid region and item name, referencing the created dictionary to validate item names
     validated_Input = get_validated_Input(marketable_Item_Mapppings)
 
-    get_listings(validated_Input)
+    # create a dictionary of all the listings for the given item and region
+    listings = get_listings(validated_Input)
 
 
     return
@@ -29,7 +30,7 @@ def get_marketable_Item_IDs():
     # loads response into a list of all item id
     marketable_Item_IDs = json.loads(marketable_Item_IDs.text)
     
-    ## debug structure of Item ids (Should be list)
+    # # debug structure of Item ids (Should be list)
     #print(marketable_Item_IDs)
 
     return marketable_Item_IDs
@@ -44,8 +45,8 @@ def get_Id_Mappings():
     # loades response into a dictionary of all item ids and their corosponding in game names
     ID_Mappings = ID_Mappings.json()    
 
-    ## debug structure of Id mappings (Should be dictionary)
-    #print(ID_mappings)
+    # # debug structure of Id mappings (Should be dictionary)
+    #print(ID_Mappings)
 
     return ID_Mappings
 
@@ -59,10 +60,9 @@ def get_marketable_Item_Mapppings(marketable_Item_IDs, ID_Mappings):
     for Item_ID in marketable_Item_IDs:
         marketable_Item_Mapppings[Item_ID] = ID_Mappings[str(Item_ID)]
 
-    ## debug Structure of item mappings (Should be id : name)    
+    # # debug Structure of item mappings (Should be id : name)    
     # print(marketable_Item_Mapppings)
  
-
     return marketable_Item_Mapppings
 
 
@@ -84,40 +84,55 @@ def get_validated_Input(marketable_Item_Mapppings):
     return validated_Input
 
 
-
 def get_listings(validated_Input):
 
+    # Grabs relevent url data from the user input
     region = validated_Input["region"]
     item_ID = validated_Input["item_ID"]
-
-    #temporary listing amount (to be deleted for actual use)
-    listings_amount = "listings=5&"
-
-    market_data_url = "https://universalis.app/api/v2/" + region + "/" + item_ID + "?" + listings_amount + "entries=0&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.worldID%2C+listings.quantity%2C+listings.total"
-   
-    ##debugg
-    # print(market_data_url)
-
+    # Constructs a valid url with the givin inputs
+    market_data_url = "https://universalis.app/api/v2/" + region + "/" + item_ID + "?entries=0&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.quantity%2C+listings.total%2C+listings.listingID"
+    
+    # Get request for all the relevent market data for the given item and region (PricePerUnit, Quantity, WorldName, WorldID, ListingID, Total)
     market_Data = requests.get(market_data_url, timeout=5)
+    # Validate status code (200 = good)
     print("market_Data Status code: ", market_Data.status_code)
+    # loads response into a list of dictionaries for each listing and their fields
     listings = market_Data.json()['listings']
     
+    # # debug Structure of listings (should be list of dictionaries with all their respective fields)
+    # print(listings)
+    
 
-    item_index = 0
+    # Make a dictionary of listings organized by their listingID
+    # Initializes and empty Dictionary
+    listing_IDs_Dict = {}
+
+    # Iterates through each listing, intializing an empty dict with name equal to the listing ID
     for listing in listings:
-        item_index += 1
-        print("\nitem number: ",item_index)
-        for thing in listing:
-            print(f"{thing}: {listing[thing]}")
+        listing_IDs_Dict[listing['listingID']] = {}
+        
+        # Iterates through each field of the listing and copies them over to the new dictionary organized by id
+        for field in listing:
+            listing_IDs_Dict[listing['listingID']][field] = listing[field]
+        
+    # Debugg for Validating Dictionary integrity         
+    print(listing_IDs_Dict)
+    
+    return listing_IDs_Dict
 
 
+# def make_change(input, coins):
+#     used_Coins = []
+#     i = 0
+#     while input > 0:
+#         if coins[i] <= input:
+#             input = round(input - (coins[i]), ndigits=2)
+#             used_Coins.append(coins[i])
 
+#         else:
+#             i += 1
 
-
-    return listings
-
-
-
+#     return used_Coins
 
 
 main()
