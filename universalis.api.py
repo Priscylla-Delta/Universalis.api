@@ -292,9 +292,9 @@ def render_purchase_Order(purchase_Order, listings, validated_Input):
         price_Per_Units.append(price_per_unit)
 
         # Print Individual purchases
-        print(f"{listing["quantity"]} {item_name} from {listing["retainerName"]} for {item_Costs} Gil at {price_per_unit} per item. ({tax_cost} Gil added in taxes)")
+        print(f"{listing["quantity"]} {item_name} from {listing["retainerName"]} at {listing["worldName"]} for {item_Costs} Gil at {price_per_unit} per item. ({tax_cost} Gil added in taxes)")
 
-    average_Price_Per_Unit = sum(price_Per_Units) / len(price_Per_Units)
+    average_Price_Per_Unit = round(sum(price_Per_Units) / len(price_Per_Units), ndigits=2)
 
 
     print(f"\nRequest Amount : {quantity}")
