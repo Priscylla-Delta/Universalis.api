@@ -22,7 +22,7 @@ def main():
     purchase_Order = get_purchase_Order(listings, validated_Input)
 
     # Render the order in some Gui
-    render_purchase_Order(purchase_Order, listings)
+    render_purchase_Order(purchase_Order, listings, validated_Input)
 
     return
 
@@ -183,7 +183,7 @@ def get_listings(validated_Input):
         quality = True
 
     # Constructs a valid url with givin inputs
-    market_Data_Url = f"https://universalis.app/api/v2/{region}/{item_ID}?entries=0&hq={quality}&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.quantity%2C+listings.total%2C+listings.listingID+%2C+listings.retainerName%2C+listings.hq"
+    market_Data_Url = f"https://universalis.app/api/v2/{region}/{item_ID}?entries=0&hq={quality}&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.quantity%2C+listings.total%2C+listings.listingID+%2C+listings.retainerName%2C+listings.hq%2C+listings.tax"
 
     # Get request for all the relevent market data for the given item and region (PricePerUnit, Quantity, WorldName, WorldID, ListingID, Total)
     market_Data = requests.get(market_Data_Url, timeout=5)
@@ -253,21 +253,68 @@ def get_purchase_Order(listings, validated_Input):
         quantity += 1
 
 
-def render_purchase_Order(purchase_Order, listings):
-    #print(purchase_Order)
-    #print(listings)
+def render_purchase_Order(purchase_Order, listings, validated_Input):
 
-    
+    item_name = validated_Input["item_Name"]
+    item_ID = validated_Input["item_ID"]
+    region = validated_Input["region"]
+    quality = validated_Input["quality"]
+    quantity = validated_Input["quantity"]
 
+    total_Bought = 0
+    total_Cost = 0
+    total_item_Cost = 0
+    total_Tax_Cost = 0
+    average_Price_Per_Unit = 0.0
+    price_Per_Units =[]
+
+    print(f"Purchase order for {quantity} {quality} {item_name} ({item_ID}) in {region}")
     for order in purchase_Order:
-        print(listings[order])
+        listing = listings[order]
+
+        # Incriment Bought
+        total_Bought += int(listing["quantity"])
+
+        # Incriment Unit cost
+        item_Costs = int(listing["total"])
+        total_item_Cost += item_Costs
+
+        # Incriment Tax cost
+
+        tax_cost = int(listing["tax"])
+        total_Tax_Cost += tax_cost
+        
+        # Incriment Cost
+        total_Cost += item_Costs + tax_cost
+
+        # Append Price Per Units
+        price_per_unit = float(listing["pricePerUnit"])
+        price_Per_Units.append(price_per_unit)
+
+        # Print Individual purchases
+        print(f"{listing["quantity"]} {item_name} from {listing["retainerName"]} for {item_Costs} Gil at {price_per_unit} per item. ({tax_cost} Gil added in taxes)")
+
+    average_Price_Per_Unit = sum(price_Per_Units) / len(price_Per_Units)
+
+
+    print(f"\nRequest Amount : {quantity}")
+    print(f"Total Amount Bought: {total_Bought}")
+    print(f"Total Cost : {total_Cost}")
+    print(f"Total Item Cost : {total_item_Cost}")
+    print(f"Total Tax Cost : {total_Tax_Cost}")
+    print(f"Average Price Per Item : {average_Price_Per_Unit}")
+
+
+
+    # for order in purchase_Order:
+    #     print(listings[order])
             
 
 
 
 
 
-    return
+    # return
 
 
 main()
