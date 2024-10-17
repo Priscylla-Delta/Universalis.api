@@ -19,7 +19,7 @@ def main():
     listings = get_listings(validated_Input)
 
     # Use the listings and make a purchase order for the user
-    purchase_Order = get_purchase_Order(listings, validated_Input['quantity'])
+    purchase_Order = get_purchase_Order(listings, validated_Input)
 
     # Render the order in some Gui
     render_purchase_Order(purchase_Order, listings)
@@ -74,56 +74,119 @@ def get_marketable_Item_Mapppings(marketable_Item_IDs, ID_Mappings):
 
 def get_validated_Input(marketable_Item_Mapppings):
 
-    item_Name = "Gyuki Hide"
-    
-    # iterates through all available items, then iterates through all languages to compare with the given item name
-    item_id = 0
-    for item in marketable_Item_Mapppings:
-        for language in marketable_Item_Mapppings[item]:
-            if item_Name == marketable_Item_Mapppings[item][language]:
-                item_id = str(item)
-                break
-        if item_id != 0:
-            break
-    if item_id == 0:
-        print("Item is not valid")
-        sys.exit()
+    # Asks the user for the name of the item to search, then checks in the marketable items list to see if its valid, repeating if invalid
+    print("Which item would you like to search for?")
+    valid_response = False
+    while valid_response == False:
 
-    # input("region: ")
-    # input("item name: ")
+        item_Name = input(": ").lower()
+        # iterates through all available items, then iterates through all languages to compare with the given item name
+        for item in marketable_Item_Mapppings:
+            for language in marketable_Item_Mapppings[item]:
+                if marketable_Item_Mapppings[item][language].lower() == item_Name:
+                    # Fixes Capitalization errors
+                    item_Name = marketable_Item_Mapppings[item][language]
+                    # Obtains Item_ID
+                    item_id = str(item)
+                    # Satisfies the condition to break the loop
+                    valid_response = True
+        if valid_response == False:
+            print(f"'{item_Name}' is an invalid item name, please try again.")    
 
-    region = "North-America"
-    # item_id= "44162"
-    language = "en"
-    quantity = 120
-    quality = "HQ"
+    # Hard Coded list of supported Regions
+    valid_Regions = ['Japan', 'Europe', 'North-America', 'Oceania', 'China']
 
-    validated_Input = {"region" : region,
-                       "item_ID" : item_id,
-                       "language" : language,
-                       "quantity" : quantity,
-                       "quality" : quality}
+    # Asks the user for the region they would like to search the item in, listing off available options, repeating if invalid
+    print(f"Which Region would you like to search for '{item_Name}' in?")
+    print("Supported Regions : 'Japan', 'Europe', 'North-America', 'Oceania', 'China'")
+    valid_response = False
+    while valid_response == False:
+
+        region = input(": ").lower()
+        # Iterates through the list of valid regions checking to see if the input matches
+        for valid_region in valid_Regions:
+            if valid_region.lower() == region:
+                # Fixes Capitalization Errors
+                region = valid_region
+                # Satisfies the condition to break the loop
+                valid_response = True
+        if valid_response == False:
+            print(f"'{region}' is an invalid region name, please select from the supported regions.")  
+            print("Supported Regions : 'Japan', 'Europe', 'North-America', 'Oceania', 'China'")
+
+    print(f"{region} Selected.")
+
+
+    # Hard Coded list of supported options
+    valid_Qualities = ['NQ', 'HQ', 'both']
+
+    # Asks the user for the quality they would like to search, listing off available options, repeating if invalid
+    print(f"What Quality would you like to search '{item_Name}' for?")
+    print("Supported Qualities : 'NQ', 'HQ', 'Both'")
+    valid_response = False
+    while valid_response == False:
+
+        quality = input(": ").lower()
+        # Iterates through the list of valid qualities, checking to see if the input matches
+        for valid_Quality in valid_Qualities:
+            if valid_Quality.lower() == quality:
+                # Fixes Capitalization Errors
+                quality = valid_Quality
+                # Satisfies the condition to break the loop
+                valid_response = True
+        if valid_response == False:
+            print(f"'{quality}' is an invalid quality, please select from the types.")  
+            print("Supported Qualities : 'NQ', 'HQ', 'Both'")
+
+    print(f"{quality} Selected.")
+
+
+    # Asks the user for the quantity they would like to search, repeating if not a non-zero integar
+    print(f"What Quantity would you like to search '{item_Name}' for?")
+    valid_response = False
+    while valid_response == False:
+        try:
+            quantity = int(input(": "))
+            if quantity > 0:
+                valid_response = True
+            else:
+                print(f"'{quantity}' is not a non-zero positive integer, please try again.")
+        except ValueError:
+            print(f"'{quantity}' is not a non-zero positive integer, please try again.")
+        
+    print(f"{quantity} Selected.")
+
+
+    validated_Input = {"item_Name" : item_Name, "item_ID" : item_id, "region" : region, "quality" : quality, "quantity" : quantity}
+
+    # # debug Validated_Input Structure
+    # print(validated_Input)
+
 
     return validated_Input
 
 
 def get_listings(validated_Input):
 
-    # Grabs relevent url data from the user input
-    region = validated_Input["region"]
-    item_ID = validated_Input["item_ID"]
+    # validated_Input = {"item_Name" : item_Name, "item_ID" : item_id, "region" : region, "quality" : quality, "quantity" : quantity}
 
+    item_name = validated_Input["item_Name"]
+    item_ID = validated_Input["item_ID"]
+    region = validated_Input["region"]
     quality = validated_Input["quality"]
 
-
-
-
-
-    # Constructs a valid url with the givin inputs
-    market_data_url = "https://universalis.app/api/v2/" + region + "/" + item_ID + "?entries=0&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.quantity%2C+listings.total%2C+listings.listingID"
+    print(f"Grabbing Listings for {quality} {item_name} ({item_ID}) in {region}")
     
+    if quality == "NQ":
+        quality = False
+    elif quality == "HQ":
+        quality = True
+
+    # Constructs a valid url with givin inputs
+    market_Data_Url = f"https://universalis.app/api/v2/{region}/{item_ID}?entries=0&hq={quality}&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.quantity%2C+listings.total%2C+listings.listingID+%2C+listings.retainerName%2C+listings.hq"
+
     # Get request for all the relevent market data for the given item and region (PricePerUnit, Quantity, WorldName, WorldID, ListingID, Total)
-    market_Data = requests.get(market_data_url, timeout=5)
+    market_Data = requests.get(market_Data_Url, timeout=5)
     # Validate status code (200 = good)
     print("market_Data Status code: ", market_Data.status_code)
     # loads response into a list of dictionaries for each listing and their fields
@@ -151,8 +214,10 @@ def get_listings(validated_Input):
     return listing_IDs_Dict
 
 
-def get_purchase_Order(listings, quantity):
+def get_purchase_Order(listings, validated_Input):
     
+    quantity = validated_Input["quantity"]
+
     # Create a temporty listing to make edits for
     temp_listings = listings.copy()
 
@@ -161,7 +226,7 @@ def get_purchase_Order(listings, quantity):
 
     while quantity > 0:
 
-        # If there are no listings (should be checked elsewhere but alas)
+        # If there are no listings left (ie all items are to be bought OR none are being sold)
         if len(temp_listings) == 0:
             return purchase_Order
 
