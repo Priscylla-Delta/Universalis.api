@@ -1,6 +1,5 @@
 import requests
 import json
-import sys
 
 def main():
 
@@ -57,7 +56,6 @@ def get_Id_Mappings():
     return ID_Mappings
 
 
-
 def get_marketable_Item_Mapppings(marketable_Item_IDs, ID_Mappings):
 
     # intialized an empty dictionary 
@@ -92,6 +90,7 @@ def get_validated_Input(marketable_Item_Mapppings):
                     valid_response = True
         if valid_response == False:
             print(f"'{item_Name}' is an invalid item name, please try again.")    
+
 
     # Hard Coded list of supported Regions
     valid_Regions = ['Japan', 'Europe', 'North-America', 'Oceania', 'China']
@@ -162,7 +161,6 @@ def get_validated_Input(marketable_Item_Mapppings):
     # # debug Validated_Input Structure
     # print(validated_Input)
 
-
     return validated_Input
 
 
@@ -176,7 +174,8 @@ def get_listings(validated_Input):
     quality = validated_Input["quality"]
 
     print(f"Grabbing Listings for {quality} {item_name} ({item_ID}) in {region}")
-    
+
+    # Formatting Quality to True/False, as expected by the API
     if quality == "NQ":
         quality = False
     elif quality == "HQ":
@@ -243,7 +242,6 @@ def get_purchase_Order(listings, validated_Input):
                 temp_listings.pop(listing)
                 
                 
-
             if quantity == 0:
                 # If youve bought exactly enough, stop the loop
                 # # Debugg for validating Purchase order structure, should be a list of Listing Ids
@@ -294,6 +292,7 @@ def render_purchase_Order(purchase_Order, listings, validated_Input):
         # Print Individual purchases
         print(f"{listing["quantity"]} {item_name} from {listing["retainerName"]} at {listing["worldName"]} for {item_Costs} Gil at {price_per_unit} per item. ({tax_cost} Gil added in taxes)")
 
+    # Compute Average
     average_Price_Per_Unit = round(sum(price_Per_Units) / len(price_Per_Units), ndigits=2)
 
 
@@ -303,18 +302,6 @@ def render_purchase_Order(purchase_Order, listings, validated_Input):
     print(f"Total Item Cost : {total_item_Cost}")
     print(f"Total Tax Cost : {total_Tax_Cost}")
     print(f"Average Price Per Item : {average_Price_Per_Unit}")
-
-
-
-    # for order in purchase_Order:
-    #     print(listings[order])
-            
-
-
-
-
-
-    # return
 
 
 main()
