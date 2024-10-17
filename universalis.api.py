@@ -1,5 +1,6 @@
 import requests
 import json
+import sys
 
 def main():
 
@@ -17,6 +18,8 @@ def main():
     # create a dictionary of all the listings for the given item and region
     listings = get_listings(validated_Input)
 
+    #use the listings and make a purchase order for the user
+    purchase_Order= get_purchase_Order(listings, validated_Input['quantity'])
 
     return
 
@@ -72,9 +75,9 @@ def get_validated_Input(marketable_Item_Mapppings):
     # input("item name: ")
 
     region = "North-America"
-    item_id= "44177"
+    item_id= "44162"
     language = "en"
-    quantity = "100"
+    quantity = 500
 
     validated_Input = {"region" : region,
                        "item_ID" : item_id,
@@ -115,10 +118,46 @@ def get_listings(validated_Input):
         for field in listing:
             listing_IDs_Dict[listing['listingID']][field] = listing[field]
         
-    # Debugg for Validating Dictionary integrity         
-    print(listing_IDs_Dict)
+    # # Debugg for Validating Dictionary integrity         
+    # print(listing_IDs_Dict)
     
     return listing_IDs_Dict
+
+
+def get_purchase_Order(listings, quantity):
+    
+    # Initialize a purchase order to store the list of listing Id's
+    purchase_order = []
+
+    while quantity > 0:
+
+        # If there are no listings (should be checked elsewhere but alas)
+        if len(listings) == 0:
+            return purchase_order
+
+        # Iterate through a copy of each listing's id and grab the quantity being sold
+        for listing in list(listings):
+            listing_quantity = listings[listing]['quantity']
+            
+            # If the listing quanitity is less or equal to the quantity being baught, subtract that amount
+            # and add the listing id to the purchase order and remove the listingID from the listings Dict
+            # such that the incrimentation backup doesnt reuse listings 
+            if listing_quantity <= quantity:
+                quantity = quantity - listing_quantity
+                purchase_order.append(listing)
+                listings.pop(listing, None)
+                
+
+            if quantity == 0:
+                # If youve bought exactly enough, stop the loop
+                # # Debugg for validating Purchase order structure, should be a list of Listing Ids
+                print(purchase_order)
+                return purchase_order
+            
+        quantity += 1
+
+
+
 
 
 # def make_change(input, coins):
