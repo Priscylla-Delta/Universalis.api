@@ -129,7 +129,8 @@ def get_listings(validated_Input):
 
 def get_purchase_Order(listings, quantity):
     
-    temp_Listings = listings
+    # Create a temporty listing to make edits for
+    temp_listings = listings.copy()
 
     # Initialize a purchase order to store the list of listing Id's
     purchase_Order = []
@@ -137,12 +138,12 @@ def get_purchase_Order(listings, quantity):
     while quantity > 0:
 
         # If there are no listings (should be checked elsewhere but alas)
-        if len(temp_Listings) == 0:
+        if len(temp_listings) == 0:
             return purchase_Order
 
         # Iterate through a copy of each listing's id and grab the quantity being sold
-        for listing in list(temp_Listings):
-            listing_quantity = temp_Listings[listing]['quantity']
+        for listing in list(temp_listings):
+            listing_quantity = temp_listings[listing]['quantity']
             
             # If the listing quanitity is less or equal to the quantity being baught, subtract that amount
             # and add the listing id to the purchase order and remove the listingID from the listings Dict
@@ -150,8 +151,8 @@ def get_purchase_Order(listings, quantity):
             if listing_quantity <= quantity:
                 quantity = quantity - listing_quantity
                 purchase_Order.append(listing)
-                #del temp_Listings[listing]
-                temp_Listings.pop(listing)
+                temp_listings.pop(listing)
+                
                 
 
             if quantity == 0:
@@ -167,34 +168,11 @@ def render_purchase_Order(purchase_Order, listings):
     #print(purchase_Order)
     #print(listings)
 
-
-
-    # print(purchase_Order[0])
-    # print(type(purchase_Order[0]))
-    
-    # for listing in listings:
-    #     print(type(listing))
-    #     print(listing)
-    #     sys.exit()
-
-
-    
-    first_purchase = purchase_Order[0]
-    print(first_purchase)
-
-    #print(listings)
-    print(listings[first_purchase])
-    for listing in listings:
-        print(listing)
-        return
     
 
-    # for order in purchase_Order:
-    #     for listing in listings:
-    #         # print(listing)
-    #         # print(listings[listing]["listingID"])
-    #         print(listings[order])
-    #         sys.exit()
+    for order in purchase_Order:
+        print(listings[order])
+            
 
 
 
