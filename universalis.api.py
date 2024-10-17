@@ -37,7 +37,7 @@ def get_marketable_Item_IDs():
     marketable_Item_IDs = json.loads(marketable_Item_IDs.text)
     
     # # debug structure of Item ids (Should be list)
-    #print(marketable_Item_IDs)
+    # print(marketable_Item_IDs)
 
     return marketable_Item_IDs
 
@@ -52,7 +52,7 @@ def get_Id_Mappings():
     ID_Mappings = ID_Mappings.json()    
 
     # # debug structure of Id mappings (Should be dictionary)
-    #print(ID_Mappings)
+    # print(ID_Mappings)
 
     return ID_Mappings
 
@@ -74,18 +74,35 @@ def get_marketable_Item_Mapppings(marketable_Item_IDs, ID_Mappings):
 
 def get_validated_Input(marketable_Item_Mapppings):
 
+    item_Name = "Gyuki Hide"
+    
+    # iterates through all available items, then iterates through all languages to compare with the given item name
+    item_id = 0
+    for item in marketable_Item_Mapppings:
+        for language in marketable_Item_Mapppings[item]:
+            if item_Name == marketable_Item_Mapppings[item][language]:
+                item_id = str(item)
+                break
+        if item_id != 0:
+            break
+    if item_id == 0:
+        print("Item is not valid")
+        sys.exit()
+
     # input("region: ")
     # input("item name: ")
 
     region = "North-America"
-    item_id= "44162"
+    # item_id= "44162"
     language = "en"
-    quantity = 500
+    quantity = 120
+    quality = "HQ"
 
     validated_Input = {"region" : region,
                        "item_ID" : item_id,
                        "language" : language,
-                       "quantity" : quantity}
+                       "quantity" : quantity,
+                       "quality" : quality}
 
     return validated_Input
 
@@ -95,6 +112,13 @@ def get_listings(validated_Input):
     # Grabs relevent url data from the user input
     region = validated_Input["region"]
     item_ID = validated_Input["item_ID"]
+
+    quality = validated_Input["quality"]
+
+
+
+
+
     # Constructs a valid url with the givin inputs
     market_data_url = "https://universalis.app/api/v2/" + region + "/" + item_ID + "?entries=0&statsWithin=0&fields=listings.pricePerUnit%2C+listings.worldName%2C+listings.quantity%2C+listings.total%2C+listings.listingID"
     
